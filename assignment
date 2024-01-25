@@ -1,0 +1,74 @@
+// 1. Establish a Database Context
+public class CompanyDbContext : DbContext
+{
+    public DbSet<EmployeeInfo> EmployeeInfos { get; set; }
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<EmployeeInfo>().HasKey(e => e.EmployeeId);
+        // Add other configurations if needed
+    }
+
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    {
+        optionsBuilder.UseInMemoryDatabase("CompanyDb"); // Replace with your actual database connection
+    }
+}
+
+// 2. Define an EmployeeInfo Model
+public class EmployeeInfo
+{
+    public int EmployeeId { get; set; }
+    public string FirstName { get; set; }
+    public string LastName { get; set; }
+    // Add other properties as needed
+}
+
+// 3. Display Employee Information
+class OrganizationApp
+{
+    static void Main()
+    {
+        using (var context = new CompanyDbContext())
+        {
+            var employeeList = context.EmployeeInfos.ToList();
+            foreach (var employee in employeeList)
+            {
+                Console.WriteLine($"EmployeeId: {employee.EmployeeId}, Name: {employee.FirstName} {employee.LastName}");
+            }
+        }
+    }
+}
+
+// 4. Employee Operations
+// (Assuming you have an instance of CompanyDbContext named 'context')
+
+// Create
+var newEmployee = new EmployeeInfo { FirstName = "Alice", LastName = "Smith" };
+context.EmployeeInfos.Add(newEmployee);
+context.SaveChanges();
+
+// Read
+var retrievedEmployee = context.EmployeeInfos.Find(employeeId);
+
+// Update
+retrievedEmployee.FirstName = "UpdatedAlice";
+context.SaveChanges();
+
+// Delete
+context.EmployeeInfos.Remove(retrievedEmployee);
+context.SaveChanges();
+
+// 5. Update Information with Validation
+// (Assuming you have an instance of CompanyDbContext named 'context')
+
+var employeeToUpdate = context.EmployeeInfos.Find(employeeId);
+
+if (employeeToUpdate != null)
+{
+    // Apply your validation logic here
+    employeeToUpdate.FirstName = "UpdatedFirstName";
+    employeeToUpdate.LastName = "UpdatedLastName";
+
+    context.SaveChanges();
+}
